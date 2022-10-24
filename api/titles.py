@@ -12,13 +12,13 @@ from api.utils.util_func import check_if_exists
 
 router = fastapi.APIRouter()
 
-@router.get("/titles")
+@router.get("/titles", response_model=list[Title])
 async def read_titles():
     db_titles = await get_titles()
     print(db_titles)
     return db_titles
 
-@router.get("/titles/{title_id}")
+@router.get("/titles/{title_id}", response_model=Title)
 async def read_title(title_id: int):
     db_title = await get_title(title_id=title_id)
     if db_title is None:

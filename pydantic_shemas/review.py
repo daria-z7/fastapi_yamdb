@@ -7,6 +7,9 @@ from pydantic import BaseModel, constr, validator
 class GenreBase(BaseModel):
     slug: constr(regex="^[-a-zA-Z0-9_]+$")
 
+    class Config:
+        orm_mode = True
+
 
 class GenreCreate(GenreBase):
     name: str
@@ -61,15 +64,15 @@ class TitleCreate(TitleBase):
 
 class Title(TitleBase):
     id: int
-    genre: list[GenreCreate]
-    category: CategoryCreate
+    genre: list[GenreBase]
+    category: str
     rating: int | None
 
     @validator('rating')
     def check_rating(cls, v):
         if v is None:
             return 0
-        return v
+        return round(v)
 
     class Config:
         orm_mode = True

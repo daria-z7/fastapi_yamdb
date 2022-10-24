@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, insert, update, delete
 from sqlalchemy.future import select
 
@@ -29,6 +29,9 @@ async def get_titles():
         ).outerjoin(
             sq_rating,
             Title.id==sq_rating.c.title_id
+        ).join(
+            Category,
+            Title.category_id==Category.id
         )
     # query_rating = []
     # for obj, rating in query:
@@ -54,11 +57,15 @@ async def get_title(title_id: int):
         ).group_by(Review.title_id).subquery()
     query = select(
         Title,
+        Category.slug.label("category"),
         sq_rating.c.rating
         ).outerjoin(
             sq_rating,
             Title.id==sq_rating.c.title_id
-        ).where(Title.id==title_id)
+        ).join(
+            Category,
+            Title.category_id==Category.id
+        ).options(joinedload(Title.genre)).where(Title.id==title_id)
     return await database.fetch_one(query)
 
 async def create_title(title: TitleCreate):
